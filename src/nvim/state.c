@@ -1,6 +1,9 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check
 // it. PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "nvim/lib/kvec.h"
@@ -24,6 +27,10 @@
 
 void state_enter(VimState *s)
 {
+  FILE* fp = fopen("/tmp/a", "a");
+  char *buffer = "start\n";
+  fwrite(buffer, sizeof(buffer[0]), strlen(buffer), fp);
+  buffer = malloc(128);
   for (;;) {
     int check_result = s->check ? s->check(s) : 1;
 
@@ -66,6 +73,8 @@ getkey:
     log_key(DEBUG_LOG_LEVEL, key);
 #endif
 
+	sprintf(buffer, "%d\n", key); // print int 'n' into the char[] buffer
+	fwrite(buffer, sizeof(buffer[0]), strlen(buffer), fp);
     int execute_result = s->execute(s, key);
     if (!execute_result) {
       break;
@@ -73,6 +82,7 @@ getkey:
       goto getkey;
     }
   }
+  fclose(fp);
 }
 
 /// process events on main_loop, but interrupt if input is available
