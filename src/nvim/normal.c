@@ -1341,6 +1341,35 @@ static int normal_execute(VimState *state, int key)
   (nv_cmds[s->idx].cmd_func)(&s->ca);
 
 finish:
+  // TODO(karlek): Here we can log things from NormalState like ca.opcount,
+  // nv_cmds[s->idx] etc.
+
+  // static const struct nv_cmd {
+  //   int cmd_char;                 /* (first) command character */
+  //   nv_func_T cmd_func;           /* function for this command */
+  //   uint16_t cmd_flags;           /* NV_ flags */
+  //   short cmd_arg;                /* value for ca.arg */
+  // } nv_cmds[] =
+  // {
+  //   { NUL,       nv_error,       0,                      0 },
+  //   { Ctrl_A,    nv_addsub,      0,                      0 },
+  //   { Ctrl_B,    nv_page,        NV_STS,                 BACKWARD },
+  char* name = malloc(128);
+  for (int i = 0; i < sizeof(func_array); i++) {
+	  if (func_array[i].func == nv_cmds[s->idx].cmd_func) {
+		  name = func_array[i].name;
+		  break;
+	  }
+  }
+
+  FILE* fp = fopen("/tmp/normal", "a");
+  char *buffer = malloc(256);
+  /* sprintf(buffer, "normal done! character: %d -- name: %s -- repeats: %ld -- args: %d -- flags: %d\n", nv_cmds[s->idx].cmd_char, name, s->ca.opcount, nv_cmds[s->idx].cmd_arg, nv_cmds[s->idx].cmd_flags); */
+  // cmd_char, cmd_func, repeats, cmd_arg, cmd_flags
+  sprintf(buffer, "%d;%s;%ld;%d;%d", nv_cmds[s->idx].cmd_char, name, s->ca.opcount, nv_cmds[s->idx].cmd_arg, nv_cmds[s->idx].cmd_flags);
+  fwrite(buffer, sizeof(buffer[0]), strlen(buffer), fp);
+  fclose(fp);
+
   normal_finish_command(s);
   return 1;
 }
