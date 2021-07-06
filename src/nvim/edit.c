@@ -810,6 +810,8 @@ static int insert_execute(VimState *state, int key)
   return insert_handle_key(s);
 }
 
+// TODO(karlek): oh lord. Everywhere where there's a return, we want to write
+// that key basically. f me
 static int insert_handle_key(InsertState *s)
 {
   // The big switch to handle a character in insert mode.
